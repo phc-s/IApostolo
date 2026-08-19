@@ -332,10 +332,8 @@
             </div>
         </div>
 
-        <!-- DIVISÓRIA ÚNICA COM CONTEÚDO DINÂMICO -->
         <div class="content-area">
 
-            <!-- ABA 1: CONSULTA (CHAT) -->
             <div id="chatTab" class="tab-content active">
                 <div class="chat-messages" id="chatMessages">
                     <div class="message ai">Olá! Sou seu microagente de IA especialista na Torah. Como posso ajudar você hoje?</div>
@@ -347,11 +345,9 @@
                 </div>
             </div>
 
-            <!-- ABA 2: SOBRE COMO FUNCIONA, TECNOLOGIAS E ARQUITETURA -->
             <div id="aboutTab" class="tab-content">
                 <div class="info-tab-body">
                     
-                    <!-- Bloco 1: Como Funciona -->
                     <div class="info-card">
                         <h2>🛠️ Funcionamento do Agente</h2>
                         <div class="steps-list">
@@ -370,7 +366,6 @@
                         </div>
                     </div>
 
-                    <!-- Bloco 2: Arquitetura & Tecnologias -->
                     <div class="info-card">
                         <h2>🏗️ Arquitetura & Tecnologias</h2>
                         <p style="font-size: 0.85rem; color: #ddd; line-height: 1.4; margin-bottom: 10px;">
@@ -387,7 +382,6 @@
                         </div>
                     </div>
 
-                    <!-- Bloco 3: Créditos do Desenvolvedor -->
                     <div class="info-card">
                         <h2>👨‍💻 Créditos de Desenvolvimento</h2>
                         <div class="developer-credits">
@@ -404,7 +398,6 @@
                 </div>
             </div>
 
-            <!-- ABA 3: DOWNLOAD DO PDF -->
             <div id="downloadTab" class="tab-content">
                 <div class="info-tab-body">
                     <div class="info-card">
@@ -427,7 +420,6 @@
         const sendBtn = document.getElementById('sendBtn');
         const saveBtn = document.getElementById('saveBtn');
 
-        // Alternar entre as abas da divisória
         function switchTab(tabId, btnElement) {
             document.querySelectorAll('.tab-content').forEach(tab => {
                 tab.classList.remove('active');

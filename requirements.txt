@@ -1,4 +1,5 @@
 fastapi
 uvicorn
+pypdf2
 google-genai
 pydantic
