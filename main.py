@@ -80,17 +80,18 @@ def read_index():
         return FileResponse(index_path)
     return {"status": "Servidor online, mas index.html não foi encontrado."}
 
-@app.get("/download-pdf")
-def download_pdf():
-    if os.path.exists(PDF_PATH):
+@app.get("/OpenBible.pt-BR.pdf")
+def serve_pdf_direct():
+    pdf_path = find_pdf_file()
+    if pdf_path and os.path.exists(pdf_path):
         return FileResponse(
-            path=PDF_PATH, 
+            path=pdf_path, 
             filename="OpenBible.pt-BR.pdf", 
             media_type="application/pdf"
         )
     return {
-        "error": f"Arquivo PDF não encontrado no caminho: {PDF_PATH}",
-        "files_in_dir": os.listdir(BASE_DIR)
+        "error": "Arquivo PDF não encontrado na raiz do servidor.",
+        "arquivos_na_raiz": os.listdir(BASE_DIR)
     }
 
 @app.get("/models")
