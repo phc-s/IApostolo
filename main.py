@@ -8,7 +8,7 @@ from pydantic import BaseModel
 from google import genai
 from google.genai import errors
 
- AVAILABLE_MODELS = [
+AVAILABLE_MODELS = [
 
 "gemini-2.5-flash",
 "gemini-3.1-flash-lite",
