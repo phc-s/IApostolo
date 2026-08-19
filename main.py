@@ -1,8 +1,11 @@
 import os
+from typing import Optional
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from pydantic import BaseModel
+from google import genai
+from google.genai import errors
 
 app = FastAPI()
 
@@ -14,10 +17,15 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+AVAILABLE_MODELS = [
+    "gemini-2.5-flash",
+    "gemini-2.5-flash-lite",
+]
+
 class ChatRequest(BaseModel):
     message: str
+    model: Optional[str] = "gemini-2.5-flash"
 
-# Função de leitura segura tratada dentro das requisições
 def load_pdf_context(filepath: str) -> str:
     if not os.path.exists(filepath):
         print(f"⚠️ AVISO: {filepath} não encontrado no servidor.")
@@ -38,7 +46,6 @@ def load_pdf_context(filepath: str) -> str:
 
 @app.get("/")
 def read_index():
-    # Verifica se o index.html existe para evitar crash no GET /
     if os.path.exists("index.html"):
         return FileResponse("index.html")
     return {"status": "Servidor online, mas index.html não foi encontrado."}
@@ -47,34 +54,49 @@ def read_index():
 async def chat_endpoint(request: ChatRequest):
     api_key = os.environ.get("GEMINI_API_KEY")
     if not api_key:
-        return {"response": "Erro: A variável GEMINI_API_KEY não foi configurada no Render."}
+        return {"response": "Erro: A variável GEMINI_API_KEY não foi configurada no servidor."}
     
-    # Lê o PDF apenas quando necessário
-    pdf_context = load_pdf_context("OpenBible_pt-BR_Proverbios.pdf")
+    selected_model = request.model if request.model in AVAILABLE_MODELS else "gemini-2.5-flash"
+
+    pdf_context = load_pdf_context("OpenBible.pt-BR.pdf")
     if not pdf_context:
         return {"response": "Não tenho contexto do documento disponível no servidor."}
 
     try:
-        from google import genai
         client = genai.Client(api_key=api_key)
         
         prompt = f"""
-        Você é um assistente sobre a Bíblia. Responda à pergunta do usuário estritamente com base no contexto:
+        Você é um assistente especializado sobre a Bíblia/Pentateuco. Responda à pergunta do usuário estritamente com base no contexto fornecido.
+        
+        INSTRUÇÕES DE FORMATAÇÃO:
+        - Utilize formatação Markdown para deixar a leitura agradável.
+        - Use **negrito** para destacar nomes, versículos ou pontos principais.
+        - Use *itálico* para termos em hebraico, citações diretas ou ênfases sutis.
+        - Utilize listas com tópicos (bullet points) quando necessário.
 
         Contexto:
-        {pdf_context[:20000]} 
+        {pdf_context} 
 
         Pergunta: {request.message}
         """
 
         ai_response = client.models.generate_content(
-            model='gemini-2.5-flash',
+            model=selected_model,
             contents=prompt,
         )
         return {"response": ai_response.text}
+
+    except errors.APIError as e:
+        if e.code == 429:
+            return {
+                "response": "⚠️ O limite gratuito de requisições da API do Gemini foi atingido. Por favor, tente mais tarde."
+            }
+        print(f"❌ Erro na API do Gemini: {e}")
+        return {"response": f"Erro na API Gemini ({e.code}): {e.message}"}
+
     except Exception as e:
-        print(f"Erro na API da Gemini: {e}")
-        return {"response": "Desculpe, tive um problema ao me conectar com a IA."}
+        print(f"❌ Erro inesperado no servidor: {e}")
+        return {"response": "Desculpe, tive um problema interno ao me conectar com a IA."}
 
 if __name__ == "__main__":
     import uvicorn
