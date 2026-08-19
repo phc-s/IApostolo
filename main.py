@@ -76,7 +76,7 @@ def download_pdf():
     if os.path.exists(PDF_PATH):
         return FileResponse(
             path=PDF_PATH, 
-            filename="Torah-OpenBible.pdf", 
+            filename="OpenBible.pt-BR.pdf", 
             media_type="application/pdf"
         )
     return {
