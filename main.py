@@ -21,28 +21,37 @@ AVAILABLE_MODELS = [
 ]
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-PDF_FILENAME = "OpenBible.pt-BR.pdf"
-PDF_PATH = os.path.join(BASE_DIR, PDF_FILENAME)
 
-# Referência global para o arquivo processado na nuvem do Gemini
 GEMINI_PDF_FILE = None
+ACTIVE_PDF_PATH = None
+
+def find_pdf_file() -> Optional[str]:
+    """Busca o PDF na raiz, tratando diferenças de maiúsculas/minúsculas."""
+    exact_path = os.path.join(BASE_DIR, "OpenBible.pt-BR.pdf")
+    if os.path.exists(exact_path):
+        return exact_path
+
+    for file in os.listdir(BASE_DIR):
+        if file.lower().endswith(".pdf"):
+            return os.path.join(BASE_DIR, file)
+    return None
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    global GEMINI_PDF_FILE
+    global GEMINI_PDF_FILE, ACTIVE_PDF_PATH
     api_key = os.environ.get("GEMINI_API_KEY")
-    
+    ACTIVE_PDF_PATH = find_pdf_file()
+
     if not api_key:
-        print("⚠️ AVISO: GEMINI_API_KEY não configurada. O upload do PDF não será feito no startup.")
-    elif not os.path.exists(PDF_PATH):
-        print(f"⚠️ AVISO: Arquivo {PDF_FILENAME} não foi encontrado em: {PDF_PATH}")
-        print(f"📁 Arquivos presentes na pasta raiz: {os.listdir(BASE_DIR)}")
+        print("⚠️ AVISO: GEMINI_API_KEY não foi configurada nas variáveis do Render.")
+    elif not ACTIVE_PDF_PATH:
+        print(f"⚠️ AVISO: Nenhum arquivo .pdf foi encontrado em '{BASE_DIR}'.")
+        print(f"📁 Conteúdo da pasta no Render: {os.listdir(BASE_DIR)}")
     else:
         try:
             client = genai.Client(api_key=api_key)
-            print("⏳ Fazendo upload do PDF para a API do Gemini...")
-            # Envia o arquivo PDF direto para os servidores do Gemini
-            GEMINI_PDF_FILE = client.files.upload(file=PDF_PATH)
+            print(f"⏳ Fazendo upload do PDF '{os.path.basename(ACTIVE_PDF_PATH)}' para a API do Gemini...")
+            GEMINI_PDF_FILE = client.files.upload(file=ACTIVE_PDF_PATH)
             print(f"✅ PDF carregado com sucesso na API do Gemini: {GEMINI_PDF_FILE.name}")
         except Exception as e:
             print(f"❌ Erro ao fazer upload do PDF para o Gemini: {e}")
