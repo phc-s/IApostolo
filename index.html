@@ -6,13 +6,13 @@
     <title>tor-ai-h</title>
     <style>
         :root {
-            --bg-gradient: linear-gradient(105deg, #000000, #162447, #9c7c38);
+            --bg-gradient: linear-gradient(105deg, #000000, #162447, #4e3622);
             --chat-bg: rgba(255, 255, 255, 0.05);
             --chat-border: rgba(255, 255, 255, 0.1);
             --text-color: #ffffff;
             --user-bubble: #0f4c81;
             --ai-bubble: rgba(255, 255, 255, 0.1);
-            --accent-color: #927d45;
+            --accent-color: #3c7245;
         }
 
         * {
@@ -155,7 +155,6 @@
             opacity: 0.9;
         }
 
-        /* Mobile Adjustments */
         @media (max-width: 480px) {
             body {
                 padding: 0;
@@ -173,21 +172,19 @@
 <body>
 
     <div class="chat-container">
-        <!-- Header -->
+
         <div class="chat-header">
             <h1>IApostolo🕊️📖</h1>
             <button class="save-btn" id="saveBtn">Salvar Chat</button>
         </div>
 
-        <!-- Chat History Area -->
         <div class="chat-messages" id="chatMessages">
             <div class="message ai">Olá, seu microagente de IA. Pergunte-me qualquer coisa sobre seu documento PDF assim que estivermos conectados!</div>
         </div>
 
-        <!-- Input Bar -->
         <div class="chat-input-area">
-            <input type="text" id="userInput" placeholder="Type your prompt here..." autocomplete="off">
-            <button id="sendBtn">Enviar</button>
+            <input type="text" id="userInput" placeholder="Coloque seu prompt aqui!" autocomplete="off">
+            <button id="sendBtn">Enviar!</button>
         </div>
     </div>
 
@@ -197,16 +194,14 @@
         const sendBtn = document.getElementById('sendBtn');
         const saveBtn = document.getElementById('saveBtn');
 
-        // Function to append a message to the chat
         function appendMessage(text, sender) {
             const messageDiv = document.createElement('div');
             messageDiv.classList.add('message', sender);
             messageDiv.textContent = text;
             chatMessages.appendChild(messageDiv);
-            chatMessages.scrollTop = chatMessages.scrollHeight; // Auto-scroll to bottom
+            chatMessages.scrollTop = chatMessages.scrollHeight; 
         }
 
-        // Handle sending message
         async function handleSend() {
             const text = userInput.value.trim();
             if (!text) return;
@@ -216,7 +211,7 @@
 
             try {
                  
-                const response = await fetch('https://your-backend-url.onrender.com/chat', {
+                const response = await fetch('/chat', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ message: text })
@@ -228,7 +223,6 @@
     }
 }
 
-        // Event listeners
         sendBtn.addEventListener('click', handleSend);
         userInput.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') {
@@ -236,7 +230,6 @@
             }
         });
 
-        // Save Chat functionality (downloads chat history as a text file)
         saveBtn.addEventListener('click', () => {
             const messages = document.querySelectorAll('.message');
             let chatText = "--- MICRO AI AGENT CHAT LOG ---\n\n";
